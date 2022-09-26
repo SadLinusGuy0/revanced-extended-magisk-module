@@ -225,7 +225,7 @@ build_yt() {
 build_music() {
 	declare -A ytmusic_args
 	local arch=$1
-	ytmusic_args[app_name]="YT Music"
+	ytmusic_args[app_name]="Music"
 	ytmusic_args[is_module]=true
 	ytmusic_args[patcher_args]="${MUSIC_PATCHER_ARGS}"
 	ytmusic_args[arch]=$arch
