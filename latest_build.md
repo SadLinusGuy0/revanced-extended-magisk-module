@@ -7,8 +7,8 @@ Patches: revanced-patches-2.69.2.1.jar
 
 YouTube version: 17.38.34  
 
-YT Music (arm64-v8a) version: 5.25.51  
+Music (arm64-v8a) version: 5.25.51  
 
-YT Music (arm-v7a) version: 5.25.51  
+Music (arm-v7a) version: 5.25.51  
 
 [revanced-extended-magisk-module repo](https://github.com/MatadorProBr/revanced-extended-magisk-module)
