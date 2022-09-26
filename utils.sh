@@ -2,16 +2,16 @@
 
 source semver
 
-MODULE_TEMPLATE_DIR="revanced-magisk"
+MODULE_TEMPLATE_DIR="revanced-extended-magisk"
 MODULE_SCRIPTS_DIR="scripts"
 TEMP_DIR="temp"
 BUILD_DIR="build"
 
 ARM64_V8A="arm64-v8a"
 ARM_V7A="arm-v7a"
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"j-hc/revanced-magisk-module"}
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-$"MatadorProBr/revanced-extended-magisk-module"}
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
-WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0"
+WGET_HEADER="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0"
 
 SERVICE_SH=$(cat $MODULE_SCRIPTS_DIR/service.sh)
 POSTFSDATA_SH=$(cat $MODULE_SCRIPTS_DIR/post-fs-data.sh)
@@ -24,17 +24,17 @@ get_prebuilts() {
 	RV_CLI_JAR="${TEMP_DIR}/${RV_CLI_URL##*/}"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 
-	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/revanced/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
+	RV_INTEGRATIONS_URL=$(req https://api.github.com/repos/inotia00/revanced-integrations/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*apk\)".*/\1/p')
 	RV_INTEGRATIONS_APK=${RV_INTEGRATIONS_URL##*/}
 	RV_INTEGRATIONS_APK="${TEMP_DIR}/${RV_INTEGRATIONS_APK%.apk}-$(cut -d/ -f8 <<<"$RV_INTEGRATIONS_URL").apk"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 
-	RV_PATCHES_URL=$(req https://api.github.com/repos/revanced/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
+	RV_PATCHES_URL=$(req https://api.github.com/repos/inotia00/revanced-patches/releases/latest - | tr -d ' ' | sed -n 's/.*"browser_download_url":"\(.*jar\)".*/\1/p')
 	RV_PATCHES_JAR="${TEMP_DIR}/${RV_PATCHES_URL##*/}"
 	local rv_patches_filename=${RV_PATCHES_JAR#"$TEMP_DIR/"}
 	local rv_patches_ver=${rv_patches_filename##*'-'}
 	log "Patches: $rv_patches_filename"
-	log "[Patches Changelog](https://github.com/revanced/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
+	log "[Patches Changelog](https://github.com/inotia00/revanced-patches/releases/tag/v${rv_patches_ver%%'.jar'*})"
 
 	dl_if_dne "$RV_CLI_JAR" "$RV_CLI_URL"
 	dl_if_dne "$RV_INTEGRATIONS_APK" "$RV_INTEGRATIONS_URL"
@@ -51,13 +51,13 @@ abort() { echo "abort: $1" && exit 1; }
 set_prebuilts() {
 	[ -d "$TEMP_DIR" ] || abort "${TEMP_DIR} directory could not be found"
 	RV_CLI_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-cli-*" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced cli not found"
+	[ -z "$RV_CLI_JAR" ] && abort "ReVanced CLI not found"
 	log "CLI: ${RV_CLI_JAR#"$TEMP_DIR/"}"
 	RV_INTEGRATIONS_APK=$(find "$TEMP_DIR" -maxdepth 1 -name "app-release-unsigned-*" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced integrations not found"
+	[ -z "$RV_CLI_JAR" ] && abort "ReVanced Integrations not found"
 	log "Integrations: ${RV_INTEGRATIONS_APK#"$TEMP_DIR/"}"
 	RV_PATCHES_JAR=$(find "$TEMP_DIR" -maxdepth 1 -name "revanced-patches-*" | tail -n1)
-	[ -z "$RV_CLI_JAR" ] && abort "revanced patches not found"
+	[ -z "$RV_CLI_JAR" ] && abort "ReVanced Patches not found"
 	log "Patches: ${RV_PATCHES_JAR#"$TEMP_DIR/"}"
 }
 
@@ -122,16 +122,14 @@ select_ver() {
 	local last_ver pkg_name=$1 apkmirror_category=$2 select_ver_experimental=$3
 	last_ver=$(get_patch_last_supported_ver "$pkg_name")
 	if [ "$select_ver_experimental" = true ] || [ -z "$last_ver" ]; then
-		if [ "$pkg_name" = "com.twitter.android" ]; then
 			last_ver=$(get_apk_vers "$apkmirror_category" | grep "release" | get_largest_ver)
 		else
 			last_ver=$(get_apk_vers "$apkmirror_category" | get_largest_ver)
-		fi
 	fi
 	echo "$last_ver"
 }
 
-build_rv() {
+build_rve() {
 	local -n args=$1
 	local version
 	reset_template
@@ -172,7 +170,7 @@ build_rv() {
 	echo "Choosing version '${version}'"
 
 	local stock_apk="${TEMP_DIR}/${args[app_name],,}-stock-v${version}-${args[arch]}.apk"
-	local patched_apk="${output_dir}/${args[app_name],,}-revanced-v${version}-${args[arch]}.apk"
+	local patched_apk="${output_dir}/${args[app_name],,}-revanced-extended-v${version}-${args[arch]}.apk"
 	if [ ! -f "$stock_apk" ]; then
 		dl_apk "https://www.apkmirror.com/apk/${args[apkmirror_dlurl]}-${version//./-}-release/" \
 			"${args[regexp]}" \
@@ -196,12 +194,12 @@ build_rv() {
 	postfsdata_sh "${args[pkg_name]}"
 	customize_sh "${args[pkg_name]}" "${version}"
 	module_prop "${args[module_prop_name]}" \
-		"${args[app_name]} ReVanced" \
+		"${args[app_name]} ReVanced Extended" \
 		"${version}" \
-		"${args[app_name]} ReVanced Magisk module" \
+		"${args[app_name]} ReVanced Extended Magisk Module" \
 		"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/update/${args[module_update_json]}"
 
-	local module_output="${args[app_name],,}-revanced-magisk-v${version}-${args[arch]}.zip"
+	local module_output="${args[app_name],,}-revanced-extended-magisk-v${version}-${args[arch]}.zip"
 	zip_module "$patched_apk" "$module_output" "$stock_apk" "${args[pkg_name]}"
 
 	echo "Built ${args[app_name]}: '${BUILD_DIR}/${module_output}'"
@@ -217,17 +215,17 @@ build_yt() {
 	yt_args[pkg_name]="com.google.android.youtube"
 	yt_args[apkmirror_dlurl]="google-inc/youtube/youtube"
 	yt_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-	yt_args[module_prop_name]="ytrv-magisk"
+	yt_args[module_prop_name]="ytrve-magisk"
 	#shellcheck disable=SC2034
 	yt_args[module_update_json]="yt-update.json"
 
-	build_rv yt_args
+	build_rve yt_args
 }
 
 build_music() {
 	declare -A ytmusic_args
 	local arch=$1
-	ytmusic_args[app_name]="Music"
+	ytmusic_args[app_name]="YT Music"
 	ytmusic_args[is_module]=true
 	ytmusic_args[patcher_args]="${MUSIC_PATCHER_ARGS}"
 	ytmusic_args[arch]=$arch
@@ -236,71 +234,15 @@ build_music() {
 	ytmusic_args[apkmirror_dlurl]="google-inc/youtube-music/youtube-music"
 	if [ "$arch" = "$ARM64_V8A" ]; then
 		ytmusic_args[regexp]='arm64-v8a</div>[^@]*@\([^"]*\)'
-		ytmusic_args[module_prop_name]="ytmusicrv-magisk"
+		ytmusic_args[module_prop_name]="ytmusicrve-magisk"
 	elif [ "$arch" = "$ARM_V7A" ]; then
 		ytmusic_args[regexp]='armeabi-v7a</div>[^@]*@\([^"]*\)'
-		ytmusic_args[module_prop_name]="ytmusicrv-arm-magisk"
+		ytmusic_args[module_prop_name]="ytmusicrve-arm-magisk"
 	fi
 	#shellcheck disable=SC2034
 	ytmusic_args[module_update_json]="music-update-${arch}.json"
 
-	build_rv ytmusic_args
-}
-
-build_twitter() {
-	declare -A tw_args
-	tw_args[app_name]="Twitter"
-	tw_args[is_module]=false
-	tw_args[patcher_args]="-r"
-	tw_args[arch]="all"
-	tw_args[pkg_name]="com.twitter.android"
-	tw_args[apkmirror_dlurl]="twitter-inc/twitter/twitter"
-	#shellcheck disable=SC2034
-	tw_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rv tw_args
-}
-
-build_reddit() {
-	declare -A reddit_args
-	reddit_args[app_name]="Reddit"
-	reddit_args[is_module]=false
-	reddit_args[patcher_args]="-r"
-	reddit_args[arch]="all"
-	reddit_args[pkg_name]="com.reddit.frontpage"
-	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
-	#shellcheck disable=SC2034
-	reddit_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rv reddit_args
-}
-
-build_warn_wetter() {
-	declare -A warn_wetter_args
-	warn_wetter_args[app_name]="WarnWetter"
-	warn_wetter_args[is_module]=false
-	warn_wetter_args[patcher_args]="-r"
-	warn_wetter_args[arch]="all"
-	warn_wetter_args[pkg_name]="de.dwd.warnapp"
-	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
-	#shellcheck disable=SC2034
-	warn_wetter_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rv warn_wetter_args
-}
-
-build_tiktok() {
-	declare -A tiktok_args
-	tiktok_args[app_name]="TikTok"
-	tiktok_args[is_module]=false
-	tiktok_args[patcher_args]="-r"
-	tiktok_args[arch]="all"
-	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
-	#shellcheck disable=SC2034
-	tiktok_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rv tiktok_args
+	build_rve ytmusic_args
 }
 
 postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
