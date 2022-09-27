@@ -1,6 +1,6 @@
 2022-09-27
   
-CLI: revanced-cli-2.13.0-all.jar  
+CLI: revanced-cli-2.12.2-all.jar  
 Integrations: app-release-unsigned-v0.42.2.apk  
 Patches: revanced-patches-2.69.2.1.jar  
 [Patches Changelog](https://github.com/inotia00/revanced-patches/releases/tag/v2.69.2.1)  
