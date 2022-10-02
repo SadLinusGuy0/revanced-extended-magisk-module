@@ -121,11 +121,6 @@ zip_module() {
 select_ver() {
 	local last_ver pkg_name=$1 apkmirror_category=$2 select_ver_experimental=$3
 	last_ver=$(get_patch_last_supported_ver "$pkg_name")
-	if [ "$select_ver_experimental" = true ] || [ -z "$last_ver" ]; then
-			last_ver=$(get_apk_vers "$apkmirror_category" | grep "release" | get_largest_ver)
-		else
-			last_ver=$(get_apk_vers "$apkmirror_category" | get_largest_ver)
-	fi
 	echo "$last_ver"
 }
 
