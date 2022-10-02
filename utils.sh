@@ -122,11 +122,9 @@ select_ver() {
 	local last_ver pkg_name=$1 apkmirror_category=$2 select_ver_experimental=$3
 	last_ver=$(get_patch_last_supported_ver "$pkg_name")
 	if [ "$select_ver_experimental" = true ] || [ -z "$last_ver" ]; then
-		if [ "$pkg_name" = "com.twitter.android" ]; then
 			last_ver=$(get_apk_vers "$apkmirror_category" | grep "release" | get_largest_ver)
 		else
 			last_ver=$(get_apk_vers "$apkmirror_category" | get_largest_ver)
-		fi
 	fi
 	echo "$last_ver"
 }
@@ -247,62 +245,6 @@ build_music() {
 	build_rvx ytmusic_args
 }
 
-build_twitter() {
-	declare -A tw_args
-	tw_args[app_name]="Twitter"
-	tw_args[is_module]=false
-	tw_args[patcher_args]=""
-	tw_args[arch]="all"
-	tw_args[pkg_name]="com.twitter.android"
-	tw_args[apkmirror_dlurl]="twitter-inc/twitter/twitter"
-	#shellcheck disable=SC2034
-	tw_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rvx tw_args
-}
-
-build_reddit() {
-	declare -A reddit_args
-	reddit_args[app_name]="Reddit"
-	reddit_args[is_module]=false
-	reddit_args[patcher_args]=""
-	reddit_args[arch]="all"
-	reddit_args[pkg_name]="com.reddit.frontpage"
-	reddit_args[apkmirror_dlurl]="redditinc/reddit/reddit"
-	#shellcheck disable=SC2034
-	reddit_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rvx reddit_args
-}
-
-build_tiktok() {
-	declare -A tiktok_args
-	tiktok_args[app_name]="TikTok"
-	tiktok_args[is_module]=false
-	tiktok_args[patcher_args]=""
-	tiktok_args[arch]="all"
-	tiktok_args[pkg_name]="com.ss.android.ugc.trill"
-	tiktok_args[apkmirror_dlurl]="tiktok-pte-ltd/tik-tok/tik-tok"
-	#shellcheck disable=SC2034
-	tiktok_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rvx tiktok_args
-}
-
-build_warn_wetter() {
-	declare -A warn_wetter_args
-	warn_wetter_args[app_name]="WarnWetter"
-	warn_wetter_args[is_module]=false
-	warn_wetter_args[patcher_args]=""
-	warn_wetter_args[arch]="all"
-	warn_wetter_args[pkg_name]="de.dwd.warnapp"
-	warn_wetter_args[apkmirror_dlurl]="deutscher-wetterdienst/warnwetter/warnwetter"
-	#shellcheck disable=SC2034
-	warn_wetter_args[regexp]="APK</span>[^@]*@\([^#]*\)"
-
-	build_rvx warn_wetter_args
-}
-
 postfsdata_sh() { echo "${POSTFSDATA_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/post-fs-data.sh"; }
 uninstall_sh() { echo "${UNINSTALL_SH//__PKGNAME/$1}" >"${MODULE_TEMPLATE_DIR}/uninstall.sh"; }
 service_sh() {
@@ -319,7 +261,7 @@ module_prop() {
 name=${2}
 version=v${3}
 versionCode=${NEXT_VER_CODE}
-author=j-hc
+author=j-hc & MatadorProBr
 description=${4}" >"${MODULE_TEMPLATE_DIR}/module.prop"
 
 	if [ "$ENABLE_MAGISK_UPDATE" = true ]; then
